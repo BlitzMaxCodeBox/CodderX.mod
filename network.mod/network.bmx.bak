@@ -1,0 +1,358 @@
+﻿SuperStrict
+
+Import vertex.bnetex
+Import brl.Threads
+Import brl.Stream
+Import brl.linkedlist
+
+Rem
+bbdoc: Secure Socket Layer
+about: Network Blitzmax Module by Mathias Kwiatkowski v1.0
+End Rem
+Module CodderX.Network
+
+ModuleInfo "Version 1.0"
+ModuleInfo "License: Open"
+ModuleInfo "Copyright: Wrapper by Mathias Kwiatkowski"
+
+Rem
+	bbdoc: TMessage klasse
+End Rem
+Type TMessage
+	Field Inhalt:TList
+	Field Client:TClient
+	
+	Rem
+		bbdoc: fügt eine line (string) der message hinzu.
+	End Rem
+	Method Add(Text:String)
+		Inhalt.AddLast Text
+	End Method
+	
+	Rem
+		bbdoc: versendet die ganze message am client
+	End Rem
+	Method Send(Client:TClient)
+		If Client Then
+			LockMutex(Client.Send_Mutex)
+			Client.Send_List.AddLast Self
+			UnlockMutex(Client.Send_Mutex)
+		EndIf
+	End Method
+	
+	Method Get:String()
+		Local Text:String
+		For Local T:String = EachIn Inhalt
+			Text = T
+			Inhalt.Remove T
+			Exit
+		Next
+		Return Text
+	End Method
+	
+	Method Count:Int()
+		Return Inhalt.Count
+	End Method
+End Type
+
+Rem
+	bbdoc: zurückgeben wieviele lines in der message sind.
+	returns: I:Int
+End Rem
+Function CountMessage:Int(Message:TMessage)
+	If Message Then
+		Return Message.Count()
+	End If
+End Function
+
+Rem
+	bbdoc: ein string aus der message abfragen
+	returns: S:String
+End Rem
+Function GetMessageText:String(Message:TMessage)
+	If Message Then
+		Return Message.Get()
+	End If
+End Function
+
+Rem
+	bbdoc: erstellt eine neue message
+	returns: Message:TMessage
+End Rem
+Function NewMessage:TMessage()
+	Local M:TMessage = New TMessage
+	M.Inhalt = New TList
+	Return M
+End Function
+
+Rem
+	bbdoc: fügt eine line (string) der message hinzu.
+End Rem
+Function AddMessage(Message:TMessage, Text:String)
+	If Message Then
+		Message.Add(Text)
+	End If
+End Function
+
+Rem
+	bbdoc: versendet die ganze message am client
+End Rem
+Function SendMessage(Message:TMessage, Client:TClient)
+	If Message Then
+		Message.Send(Client)
+	End If
+End Function
+	
+Rem
+	bbdoc: TServer klasse
+End Rem
+Type TServer
+	Field Stream:TTCPStream
+	Field Client_List:TList
+	Field Client_Mutex:TMutex
+	
+	Field Eingang_List:TList
+	Field Eingang_Mutex:TMutex
+	
+	Field Port:Int
+	
+	Function Connect_Server:Object(data:Object)
+		Local Svr:TServer = TServer(data)
+		Local Stream:TTCPStream = svr.Stream
+		Local Client:TTCPStream
+					
+		Repeat
+			Client = Stream.Accept()
+			
+			If Client Then
+				Local C:TClient = New TClient
+				C.IP = TNetwork.StringIP(Client.GetLocalIP())
+				C.Port = Client.GetLocalPort()
+				C.Stream = Client
+				C.Send_List = New TList
+				C.Send_Mutex = CreateMutex()
+				C.Server = Svr
+				
+				Local TH:TThread = CreateThread(doclient, c)
+				DetachThread(TH)
+			End If
+			
+			Delay 1
+		Forever
+	End Function
+	
+	Function DoClient:Object(data:Object)
+		Local Client:TClient = TClient(data)
+		Local Server:TServer = TServer(client.Server)
+		Local Stream:TTCPStream = client.Stream
+		
+		LockMutex(Server.Client_Mutex)
+		Server.Client_List.AddLast Client
+		UnlockMutex(Server.Client_Mutex)
+		
+		Repeat
+			If Stream.GetState() <> 1 Then
+				Exit
+			End If
+			
+			If Stream.RecvAvail() Then
+				While Stream.RecvMsg() ; Wend
+				If Stream.Size() > 0 Then
+					While Not Stream.Eof()
+						Local Line:String = stream.ReadLine()
+							
+						If Line = "[PACK]" Then
+							Local M:TMessage = NewMessage()
+							M.Client = Client
+							While Not Eof(Stream)
+								Line = Stream.ReadLine()
+								If Line = "[/PACK]" Then
+									LockMutex (Server.Eingang_Mutex)
+									Server.Eingang_List.AddLast M
+									UnlockMutex (Server.Eingang_Mutex)
+									Exit
+								EndIf
+								M.Add(Line)
+							Wend
+							
+						End If
+							
+					Wend
+				EndIf
+			EndIf
+			
+			Local Nachrichten:Int = 0
+			LockMutex (Client.Send_Mutex)
+			For Local M:TMessage = EachIn Client.Send_List
+				Stream.WriteLine("[PACK]")
+				For Local Text:String = EachIn M.Inhalt
+					Stream.WriteLine(Text)
+				Next
+				Stream.WriteLine("[/PACK]")
+				Client.Send_List.Remove M
+				Nachrichten = Nachrichten + 1
+				If Nachrichten > 15 Then Exit
+			Next
+			UnlockMutex (Client.Send_Mutex)
+			
+			Delay 1
+		Forever
+		
+		LockMutex(Server.Client_Mutex)
+		Server.Client_List.Remove Client
+		UnlockMutex(Server.Client_Mutex)
+		Stream.Flush()
+		Stream.Close()
+	End Function
+	
+	
+End Type
+
+Rem
+	bbdoc: erstellt einen server.
+	returns: Server:TServer
+End Rem
+Function CreateServer:TServer(Port:Int)
+	Local S:TServer = New TServer
+	S.Stream = New TTCPStream
+	S.Client_List = New TList
+	S.Client_Mutex = CreateMutex()
+	S.Eingang_List = New TList
+	S.Eingang_Mutex = CreateMutex()
+	
+	If Not S.Stream.Init() Then Return Null
+	If Not S.Stream.SetLocalPort(Port) Then Return Null
+	If Not S.Stream.Listen() Then Return Null
+	
+	Local TH:TThread = CreateThread(tserver.Connect_Server, S)
+	DetachThread(TH)
+		
+	Return S
+End Function
+	
+Rem
+	bbdoc: TClient klasse
+End Rem
+Type TClient	
+	Field Stream:TTCPStream
+	Field Send_List:TList
+	Field Send_Mutex:TMutex
+	Field Server:TServer
+	
+	Field Eingang_List:TList
+	Field Eingang_Mutex:TMutex
+	
+	Field Port:Int
+	Field IP:String
+	
+	Field Verbunden:Int
+	
+	Function DoServer:Object(data:Object)
+		Local Client:TClient = TClient (data)
+		Local Stream:TTCPStream = client.Stream
+		Client.Verbunden = 1
+		
+		Repeat
+			If Stream.GetState() <> 1 Then
+				Exit
+			End If
+			
+			If Stream.RecvAvail() Then
+				While Stream.RecvMsg() ; Wend
+				If Stream.Size() > 0 Then
+					While Not Stream.Eof()
+						Local Line:String = stream.ReadLine()
+							
+						If Line = "[PACK]" Then
+							Local M:TMessage = NewMessage()
+							While Not Eof(Stream)
+								Line = Stream.ReadLine()
+								If Line = "[/PACK]" Then
+									LockMutex (Client.Eingang_Mutex)
+									Client.Eingang_List.AddLast M
+									UnlockMutex (Client.Eingang_Mutex)
+									Exit
+								EndIf
+								M.Add(Line)
+							Wend
+						End If
+					Wend
+				EndIf
+			EndIf
+			
+			Local Nachrichten:Int = 0
+			LockMutex (Client.Send_Mutex)
+			For Local M:TMessage = EachIn Client.Send_List
+				Stream.WriteLine("[PACK]")
+				For Local Text:String = EachIn M.Inhalt
+					Stream.WriteLine(Text)
+				Next
+				Stream.WriteLine("[/PACK]")
+				Client.Send_List.Remove M
+				Nachrichten = Nachrichten + 1
+				If Nachrichten > 15 Then Exit
+			Next
+			UnlockMutex (Client.Send_Mutex)
+			
+			Delay 1
+		Forever
+		Stream.Flush()
+		Stream.Close()
+		Client.Verbunden = 0
+	End Function
+EndType
+
+Rem
+	bbdoc: versucht eine verbindung mit dem server herzustellen
+	returns: Client:TClient
+End Rem
+Function ConnectServer:TClient(IP:String, Port:Int)
+	Local Client:TClient = New TClient
+	Client.Port = Port
+	Client.IP = IP
+	Client.Stream = New TTCPStream
+	
+	Client.Eingang_List = New TList
+	Client.Send_List = New TList
+	Client.Eingang_Mutex = CreateMutex()
+	client.Send_Mutex = CreateMutex()
+	
+	If Not Client.Stream.Init() Then Return Null
+	If Not Client.Stream.SetLocalPort() Then Return Null
+	Client.Stream.SetRemoteIP(TNetwork.GetHostIP(IP))
+	Client.Stream.SetRemotePort(Port)
+	If Not Client.Stream.Connect() Then Return Null
+	
+	Local TH:TThread = CreateThread(TClient.DoServer, Client)
+	DetachThread(TH)
+End Function
+
+Rem
+	bbdoc: eingekommene nachrichten abfragen.
+	returns: List:TList 
+End Rem
+Function GetMessages:TList(O:Object)
+	Local Server:TServer = TServer(O)
+	Local Client:TClient = TClient(O)
+	
+	Local List:TList = New TList
+	If Server Then
+		LockMutex(Server.Eingang_Mutex)
+		For Local M:TMessage = EachIn Server.Eingang_List
+			List.AddLast M
+			Server.Eingang_List.Remove M
+		Next
+		UnlockMutex(Server.Eingang_Mutex)
+	End If
+	
+	If Client Then
+		LockMutex(Client.Eingang_Mutex)
+		For Local M:TMessage = EachIn Client.Eingang_List
+			List.AddLast M
+			Client.Eingang_List.Remove M
+		Next
+		UnlockMutex(Client.Eingang_Mutex)
+	End If
+	
+	Return List
+End Function

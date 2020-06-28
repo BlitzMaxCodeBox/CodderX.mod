@@ -1,0 +1,225 @@
+<html><head><title>Secure Socket Layer reference</title>
+<link rel=stylesheet Type=text/css href='../../../../doc/bmxstyle.css'>
+</head><body>
+<table width=100% cellspacing=0><tr align=center><td class=small>&nbsp;</td>
+<td class=small width=1%><b>CodderX.Network:</b></td>
+<td class=small width=1%><a href=#functions class=small>Functions</a></td>
+<td class=small width=1%><a href=#types class=small>Types</a></td>
+<td class=small width=1%><a href=#modinfo class=small>Modinfo</a></td>
+<td class=small width=1%><a href='../../../../mod/codderx.mod/network.mod/network.bmx' class=small>Source</a></td>
+<td class=small>&nbsp;</td></tr></table>
+<h1>Secure Socket Layer</h1>
+Network Blitzmax Module by Mathias Kwiatkowski v1.0<br><br>
+Es sollte darauf geachtet werden das dieses Modul nur im zusammenhang mit der Vertex.Bet funktioniert.<br>Um das Modul nutzen zu können muss man sich im Thread Modus befinden.
+<h2><a name=functions></a>Functions Summary</h2><table class=doc width=100%>
+<tr><td class=docleft width=1%><a href=#AddMessage>AddMessage</a></td><td class=docright>
+fügt eine line (string) der message hinzu.
+</td></tr>
+<tr><td class=docleft width=1%><a href=#ClientLatenz>ClientLatenz</a></td><td class=docright>
+ermittelt die latenz zwischen client, server  und zurück.
+</td></tr>
+<tr><td class=docleft width=1%><a href=#ConnectServer>ConnectServer</a></td><td class=docright>
+versucht eine verbindung mit dem server herzustellen.
+</td></tr>
+<tr><td class=docleft width=1%><a href=#CountMessage>CountMessage</a></td><td class=docright>
+zurückgeben wieviele lines in der message sind.
+</td></tr>
+<tr><td class=docleft width=1%><a href=#CreateServer>CreateServer</a></td><td class=docright>
+erstellt einen server.
+</td></tr>
+<tr><td class=docleft width=1%><a href=#DosBann_Time>DosBann_Time</a></td><td class=docright>
+einstellung wie lange ein client gebannt sein soll (in sekunden)
+</td></tr>
+<tr><td class=docleft width=1%><a href=#DosBannMSG_Count>DosBannMSG_Count</a></td><td class=docright>
+einstellung ab wieviel eingangsnachrichten ein dos angriff abgefangen werden soll.
+</td></tr>
+<tr><td class=docleft width=1%><a href=#GetClientList>GetClientList</a></td><td class=docright>
+man erhällt die liste mit allen clients.
+</td></tr>
+<tr><td class=docleft width=1%><a href=#GetFile>GetFile</a></td><td class=docright>
+fragt ab ob es ein download gibt und wenn werden diese in einer liste zurück gegeben.<br>For Local File:TFileSend =EachIn GetFiele(Client)
+</td></tr>
+<tr><td class=docleft width=1%><a href=#GetMessages>GetMessages</a></td><td class=docright>
+eingekommene nachrichten abfragen.
+</td></tr>
+<tr><td class=docleft width=1%><a href=#GetMessageText>GetMessageText</a></td><td class=docright>
+ein string aus der message abfragen.
+</td></tr>
+<tr><td class=docleft width=1%><a href=#GetNetwork>GetNetwork</a></td><td class=docright>
+gibt zurück ob es sich um eine UDP oder TCP verbindung handelt<br>0=TCP<br>1=UDP.
+</td></tr>
+<tr><td class=docleft width=1%><a href=#NetworkConnect>NetworkConnect</a></td><td class=docright>
+gibt eine 1 zurück wenn man verbunden ist.
+</td></tr>
+<tr><td class=docleft width=1%><a href=#NewMessage>NewMessage</a></td><td class=docright>
+erstellt eine neue message.
+</td></tr>
+<tr><td class=docleft width=1%><a href=#SendFile>SendFile</a></td><td class=docright>
+verschickt eine datei zum Client z.b. SendFile(Client,"C:\Bilder\Test.png")
+</td></tr>
+<tr><td class=docleft width=1%><a href=#SendMessage>SendMessage</a></td><td class=docright>
+versendet die ganze message am client.
+</td></tr>
+</table>
+<h2><a name=types></a>Types Summary</h2><table class=doc width=100%>
+<tr><td class=docleft width=1%><a href=#TClient>TClient</a></td><td class=docright>
+TClient klasse.
+</td></tr>
+<tr><td class=docleft width=1%><a href=#TFileSend>TFileSend</a></td><td class=docright>
+TServer klasse.
+</td></tr>
+<tr><td class=docleft width=1%><a href=#TMessage>TMessage</a></td><td class=docright>
+TMessage klasse.
+</td></tr>
+<tr><td class=docleft width=1%><a href=#TServer>TServer</a></td><td class=docright>
+TServer klasse.
+</td></tr>
+</table>
+<h2
+ id=functionsdet>Functions
+</h2>
+<table class=doc width=100% cellspacing=3 id=AddMessage>
+<tr><td class=doctop colspan=2>Function AddMessage(Message:TMessage, Text:String)</td></tr>
+<tr><td class=docleft width=1%>Description</td><td class=docright>fügt eine line (string) der message hinzu.</td></tr>
+</table>
+<br>
+<table class=doc width=100% cellspacing=3 id=ClientLatenz>
+<tr><td class=doctop colspan=2>Function ClientLatenz:Int(Client:TClient)</td></tr>
+<tr><td class=docleft width=1%>Returns</td><td class=docright>I:Int.</td></tr>
+<tr><td class=docleft width=1%>Description</td><td class=docright>ermittelt die latenz zwischen client, server  und zurück.</td></tr>
+</table>
+<br>
+<table class=doc width=100% cellspacing=3 id=ConnectServer>
+<tr><td class=doctop colspan=2>Function ConnectServer:TClient(IP:String, TCP_Port:Int, UDP_Port:Int)</td></tr>
+<tr><td class=docleft width=1%>Returns</td><td class=docright>Client:TClient.</td></tr>
+<tr><td class=docleft width=1%>Description</td><td class=docright>versucht eine verbindung mit dem server herzustellen.</td></tr>
+</table>
+<br>
+<table class=doc width=100% cellspacing=3 id=CountMessage>
+<tr><td class=doctop colspan=2>Function CountMessage:Int(Message:TMessage)</td></tr>
+<tr><td class=docleft width=1%>Returns</td><td class=docright>I:Int.</td></tr>
+<tr><td class=docleft width=1%>Description</td><td class=docright>zurückgeben wieviele lines in der message sind.</td></tr>
+</table>
+<br>
+<table class=doc width=100% cellspacing=3 id=CreateServer>
+<tr><td class=doctop colspan=2>Function CreateServer:TServer(TCP_Port:Int, UDP_Port:Int)</td></tr>
+<tr><td class=docleft width=1%>Returns</td><td class=docright>Server:TServer.</td></tr>
+<tr><td class=docleft width=1%>Description</td><td class=docright>erstellt einen server.</td></tr>
+</table>
+<br>
+<table class=doc width=100% cellspacing=3 id=DosBann_Time>
+<tr><td class=doctop colspan=2>Function DosBann_Time(Server:TServer, Sekunden:Int)</td></tr>
+<tr><td class=docleft width=1%>Description</td><td class=docright>einstellung wie lange ein client gebannt sein soll (in sekunden)</td></tr>
+</table>
+<br>
+<table class=doc width=100% cellspacing=3 id=DosBannMSG_Count>
+<tr><td class=doctop colspan=2>Function DosBannMSG_Count(Server:TServer, CountMSG:Int)</td></tr>
+<tr><td class=docleft width=1%>Description</td><td class=docright>einstellung ab wieviel eingangsnachrichten ein dos angriff abgefangen werden soll.</td></tr>
+</table>
+<br>
+<table class=doc width=100% cellspacing=3 id=GetClientList>
+<tr><td class=doctop colspan=2>Function GetClientList:TList(Server:TServer)</td></tr>
+<tr><td class=docleft width=1%>Returns</td><td class=docright>List:TList.</td></tr>
+<tr><td class=docleft width=1%>Description</td><td class=docright>man erhällt die liste mit allen clients.</td></tr>
+</table>
+<br>
+<table class=doc width=100% cellspacing=3 id=GetFile>
+<tr><td class=doctop colspan=2>Function GetFile:TList (O:Object)</td></tr>
+<tr><td class=docleft width=1%>Returns</td><td class=docright>List:TList.</td></tr>
+<tr><td class=docleft width=1%>Description</td><td class=docright>fragt ab ob es ein download gibt und wenn werden diese in einer liste zurück gegeben.<br>For Local File:TFileSend =EachIn GetFiele(Client)</td></tr>
+</table>
+<br>
+<table class=doc width=100% cellspacing=3 id=GetMessages>
+<tr><td class=doctop colspan=2>Function GetMessages:TList(O:Object)</td></tr>
+<tr><td class=docleft width=1%>Returns</td><td class=docright>List:TList.</td></tr>
+<tr><td class=docleft width=1%>Description</td><td class=docright>eingekommene nachrichten abfragen.</td></tr>
+</table>
+<br>
+<table class=doc width=100% cellspacing=3 id=GetMessageText>
+<tr><td class=doctop colspan=2>Function GetMessageText:String(Message:TMessage)</td></tr>
+<tr><td class=docleft width=1%>Returns</td><td class=docright>S:String.</td></tr>
+<tr><td class=docleft width=1%>Description</td><td class=docright>ein string aus der message abfragen.</td></tr>
+</table>
+<br>
+<table class=doc width=100% cellspacing=3 id=GetNetwork>
+<tr><td class=doctop colspan=2>Function GetNetwork:Int(Message:TMessage)</td></tr>
+<tr><td class=docleft width=1%>Returns</td><td class=docright>I:Int.</td></tr>
+<tr><td class=docleft width=1%>Description</td><td class=docright>gibt zurück ob es sich um eine UDP oder TCP verbindung handelt<br>0=TCP<br>1=UDP.</td></tr>
+</table>
+<br>
+<table class=doc width=100% cellspacing=3 id=NetworkConnect>
+<tr><td class=doctop colspan=2>Function NetworkConnect:Int(Client:TClient)</td></tr>
+<tr><td class=docleft width=1%>Returns</td><td class=docright>I:Int.</td></tr>
+<tr><td class=docleft width=1%>Description</td><td class=docright>gibt eine 1 zurück wenn man verbunden ist.</td></tr>
+</table>
+<br>
+<table class=doc width=100% cellspacing=3 id=NewMessage>
+<tr><td class=doctop colspan=2>Function NewMessage:TMessage()</td></tr>
+<tr><td class=docleft width=1%>Returns</td><td class=docright>Message:TMessage.</td></tr>
+<tr><td class=docleft width=1%>Description</td><td class=docright>erstellt eine neue message.</td></tr>
+</table>
+<br>
+<table class=doc width=100% cellspacing=3 id=SendFile>
+<tr><td class=doctop colspan=2>Function SendFile(Client:TClient, Path:String)</td></tr>
+<tr><td class=docleft width=1%>Description</td><td class=docright>verschickt eine datei zum Client z.b. SendFile(Client,"C:\Bilder\Test.png")</td></tr>
+</table>
+<br>
+<table class=doc width=100% cellspacing=3 id=SendMessage>
+<tr><td class=doctop colspan=2>Function SendMessage(Message:TMessage, Client:TClient, Fast:Int = 0)</td></tr>
+<tr><td class=docleft width=1%>Description</td><td class=docright>versendet die ganze message am client.</td></tr>
+</table>
+<br>
+<h2
+ id=typesdet>Types
+</h2>
+<table class=doc width=100% cellspacing=3 id=TClient>
+<tr><td class=doctop colspan=2>Type TClient</td></tr>
+<tr><td class=docleft width=1%>Description</td><td class=docright>TClient klasse.</td></tr>
+</table>
+<br>
+<table class=doc width=100% cellspacing=3 id=TFileSend>
+<tr><td class=doctop colspan=2>Type TFileSend</td></tr>
+<tr><td class=docleft width=1%>Description</td><td class=docright>TServer klasse.</td></tr>
+</table>
+<br>
+<table class=doc width=100% cellspacing=3 id=TMessage>
+<tr><td class=doctop colspan=2>Type TMessage</td></tr>
+<tr><td class=docleft width=1%>Description</td><td class=docright>TMessage klasse.</td></tr>
+</table>
+<table class=doc width=90% align=center><tr ><th class=doctop colspan=2 align=left><a name=TMessage_methods></a>Methods Summary</th></tr>
+<tr><td class=docleft width=1%><a href=#Add>Add</a></td><td class=docright>
+fügt eine line (string) der message hinzu.
+</td></tr>
+<tr><td class=docleft width=1%><a href=#GetNetwork>GetNetwork</a></td><td class=docright>
+gibt zurück ob es sich um eine UDP oder TCP verbindung handelt<br>0=TCP<br>1=UDP.
+</td></tr>
+<tr><td class=docleft width=1%><a href=#Send>Send</a></td><td class=docright>
+versendet die ganze message am client.
+</td></tr>
+</table>
+<table class=doc width=100% cellspacing=3 id=Add>
+<tr><td class=doctop colspan=2>Method Add(Text:String)</td></tr>
+<tr><td class=docleft width=1%>Description</td><td class=docright>fügt eine line (string) der message hinzu.</td></tr>
+</table>
+<table class=doc width=100% cellspacing=3 id=GetNetwork>
+<tr><td class=doctop colspan=2>Method GetNetwork:Int()</td></tr>
+<tr><td class=docleft width=1%>Returns</td><td class=docright>I:Int.</td></tr>
+<tr><td class=docleft width=1%>Description</td><td class=docright>gibt zurück ob es sich um eine UDP oder TCP verbindung handelt<br>0=TCP<br>1=UDP.</td></tr>
+</table>
+<table class=doc width=100% cellspacing=3 id=Send>
+<tr><td class=doctop colspan=2>Method Send(Client:TClient, Fast:Int = 0)</td></tr>
+<tr><td class=docleft width=1%>Description</td><td class=docright>versendet die ganze message am client.</td></tr>
+</table>
+<br>
+<table class=doc width=100% cellspacing=3 id=TServer>
+<tr><td class=doctop colspan=2>Type TServer</td></tr>
+<tr><td class=docleft width=1%>Description</td><td class=docright>TServer klasse.</td></tr>
+</table>
+<br>
+<h2 id=modinfo>Module Information</h2>
+<table width=100%>
+<tr><th width=1%>Version</th><td>1.0</td></tr>
+<tr><th width=1%>License</th><td>Open</td></tr>
+<tr><th width=1%>Copyright</th><td>Wrapper by Mathias Kwiatkowski</td></tr>
+<tr><th width=1%>History</th><td>1.0 Release</td></tr>
+</body></html>
